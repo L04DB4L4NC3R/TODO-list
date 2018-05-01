@@ -3,7 +3,7 @@ const redis = require("redis");
 const util = require("util");
 
 const client = redis.createClient("redis://127.0.0.1:6379");
-client.get = util.promisify(client.hget);
+client.hget = util.promisify(client.hget);
 
 
 
@@ -35,9 +35,8 @@ mongoose.Query.prototype.exec = async function(){
     }));
 
     ///check if value exists for given key in cache
-    var cacheVal = await client.hget(key);
+    var cacheVal = await client.hget(this.hashkey,key);
     cacheVal = JSON.parse(cacheVal);
-
     if(cacheVal && cacheVal.list.length > 0 ) {
         console.log("quering cache");
 
