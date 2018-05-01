@@ -18,13 +18,18 @@ mongoose.Query.prototype.exec = async function(){
     var key = JSON.stringify(Object.assign({},this.getQuery(),{
         collection:this.mongooseCollection.name
     }));
-    console.log(key);
+
     ///check if value exists for given key in cache
     var cacheVal = await client.get(key);
+    cacheVal = JSON.parse(cacheVal);
 
-    if(cacheVal){
+    if(cacheVal && cacheVal.list.length > 0 ) {
         console.log("quering cache");
-        return JSON.parse(cacheVal);
+
+        //to return a model instance for exec function
+        return Array.isArray(cacheVal)
+            ? cacheVal.map(d => new this.model(d))
+            : new this.model(cacheVal);
     }
 
     console.log("quering mongoDB");
