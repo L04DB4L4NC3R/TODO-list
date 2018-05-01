@@ -28,7 +28,9 @@ app.get('/',verify,async (req,res)=>{
     // }
 
     //if ddoesnt then update the cache by quering mongoDB and update the values
-    var data = await model.findOne({name:req.session.name}).cache()
+    var data = await model.findOne({name:req.session.name}).cache({
+        key:req.session.name
+    });
     if(data) res.render('index',{data:data.list});
     else res.render('index',{data:[]});
 });

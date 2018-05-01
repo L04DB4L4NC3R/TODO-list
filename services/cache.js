@@ -3,14 +3,16 @@ const redis = require("redis");
 const util = require("util");
 
 const client = redis.createClient("redis://127.0.0.1:6379");
-client.get = util.promisify(client.get);
+client.get = util.promisify(client.hget);
 
 
 
 //to chain a .cache() to queries
-mongoose.Query.prototype.cache = function(){
+mongoose.Query.prototype.cache = function(options={}){
 
     this.doCache = true;
+
+    this.hashkey = JSON.stringify(options.key || '');
 
     //for chaining
     return this;
@@ -33,7 +35,7 @@ mongoose.Query.prototype.exec = async function(){
     }));
 
     ///check if value exists for given key in cache
-    var cacheVal = await client.get(key);
+    var cacheVal = await client.hget(key);
     cacheVal = JSON.parse(cacheVal);
 
     if(cacheVal && cacheVal.list.length > 0 ) {
@@ -50,7 +52,7 @@ mongoose.Query.prototype.exec = async function(){
     //else return mongoDB query
     var result = await exec.apply(this,arguments);
 
-    client.set(key,JSON.stringify(result));
+    client.hset(this.hashkey,key,JSON.stringify(result));
 
     return result;
 }
