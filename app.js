@@ -2,6 +2,7 @@ const express = require('express');
 const bodyparser = require('body-parser');
 const session = require('express-session');
 require('./db/connect');
+require("./services/cache")
 
 var app =  express();
 app.set('view engine','ejs');

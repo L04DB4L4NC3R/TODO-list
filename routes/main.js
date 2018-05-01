@@ -15,25 +15,21 @@ var verify = (req,res,next)=>{
 
 app.get('/',verify,async (req,res)=>{
 
-    //turn the function into a promise
-    client.get = util.promisify(client.get);
-
-    // get the list from cache
-    const todos = await client.get(req.session.name);
-
-    //check if cache exists
-    if(todos){
-        console.log("Serving from cache: ",todos);
-        return res.render('index',{data:JSON.parse(todos)});
-    }
+    // //turn the function into a promise
+    // client.get = util.promisify(client.get);
+    //
+    // // get the list from cache
+    // const todos = await client.get(req.session.name);
+    //
+    // //check if cache exists
+    // if(todos){
+    //     console.log("Serving from cache: ",todos);
+    //     return res.render('index',{data:JSON.parse(todos)});
+    // }
 
     //if ddoesnt then update the cache by quering mongoDB and update the values
-    model.findOne({name:req.session.name})
-    .then((data)=>{
-        client.set(data.name,JSON.stringify(data.list) );
-        console.log("Serving from mongoDB: ",data.list);
-        res.render('index',{data:data.list});
-    }).catch(console.log);
+    var data = await model.findOne({name:req.session.name})
+    res.render('index',{data:data.list});
 
 });
 
