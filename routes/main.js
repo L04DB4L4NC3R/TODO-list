@@ -1,5 +1,5 @@
 const app = require('express').Router();
-
+const model = require('../db/model');
 const redis = require('redis');
 const redisUrl = 'redis://127.0.0.1:6379';
 const client = redis.createClient(redisUrl);
@@ -9,7 +9,12 @@ app.get('/',(req,res)=>{
 });
 
 app.post('/',(req,res)=>{
-    res.send(req.body);
+
+    model.update({name:req.session.name},{$push:{list:req.body.items}})
+    .then(()=>{
+        res.send(req.body);
+    }).catch(console.log);
+
 });
 
 
