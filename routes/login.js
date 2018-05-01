@@ -18,8 +18,10 @@ app.post('/',(req,res)=>{
             })
             .catch(console.log);
         }
-        else
-            res.send('user already exists');
+        else{
+            req.session.name = req.body.name;
+            res.redirect('/main')
+        }
 
     })
 
