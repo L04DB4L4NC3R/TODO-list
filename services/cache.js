@@ -7,12 +7,25 @@ client.get = util.promisify(client.get);
 
 
 
+//to chain a .cache() to queries
+mongoose.Query.prototype.cache = function(){
+
+    this.doCache = true;
+
+    //for chaining
+    return this;
+
+}
+
 
 
 const exec = mongoose.Query.prototype.exec;
 
 //overwriting the exec function to implement caching logic
 mongoose.Query.prototype.exec = async function(){
+
+    if(!this.doCache)
+        return exec.apply(this,arguments);
 
     //making a key out of the query and the collection it belongs to
     var key = JSON.stringify(Object.assign({},this.getQuery(),{
