@@ -2,6 +2,8 @@ const app = require('express').Router();
 const model = require('../db/model');
 const util = require('util');
 
+const {clearhash} = require("../services/cache");
+
 const redis = require('redis');
 const redisUrl = 'redis://127.0.0.1:6379';
 const client = redis.createClient(redisUrl);
@@ -44,6 +46,7 @@ app.post('/',verify,(req,res)=>{
 
     model.update({name:req.session.name},{$push:{list:req.body.items}})
     .then(()=>{
+        clearhash(req.session.name);
         res.redirect('/main');
     }).catch(console.log);
 
