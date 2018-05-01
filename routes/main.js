@@ -6,7 +6,14 @@ const redis = require('redis');
 const redisUrl = 'redis://127.0.0.1:6379';
 const client = redis.createClient(redisUrl);
 
-app.get('/', async (req,res)=>{
+var verify = (req,res,next)=>{
+    if(!req.session.name)
+        res.redirect('/')
+    else
+        next();
+}
+
+app.get('/',verify,async (req,res)=>{
 
     //turn the function into a promise
     client.get = util.promisify(client.get);
@@ -16,7 +23,7 @@ app.get('/', async (req,res)=>{
 
     //check if cache exists
     if(todos){
-        console.log("Serving from cache");
+        console.log("Serving from cache: ",todos);
         return res.render('index',{data:JSON.parse(todos)});
     }
 
@@ -24,6 +31,7 @@ app.get('/', async (req,res)=>{
     model.findOne({name:req.session.name})
     .then((data)=>{
         client.set(data.name,JSON.stringify(data.list) );
+        console.log("Serving from mongoDB: ",data.list);
         res.render('index',{data:data.list});
     }).catch(console.log);
 
@@ -34,7 +42,7 @@ app.get('/', async (req,res)=>{
 
 
 
-app.post('/',(req,res)=>{
+app.post('/',verify,(req,res)=>{
 
     model.update({name:req.session.name},{$push:{list:req.body.items}})
     .then(()=>{
